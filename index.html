@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прикол</title>
+    <style>
+        input {
+            text-align: right;
+            width: auto;
+        }
+
+        input[type='number'] {
+            -moz-appearance: textfield;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div>
+            y'=
+            <input type="number" id="kx" name="kx" value="0">
+            x +
+            <input type="number" id="ky" name="ky" value="0">y
+            + <input name="c" id="c" type="number" value="0">
+        </div>
+        <div>
+            y(<input type="number" id="x0" name="x0" value="0">)
+            =<input type="number" id="y0" name="y0" value="0">
+        </div>
+        <div>
+            h=
+            <input type="number" id="h" name="h" min="0" value="0.1">
+        </div>
+        <div>
+            x &isin;
+            [<input type="number" id="left_border" name="left_border" value="0">;
+            <input type="number" id="right_border" name="right_border" value="1">]
+        </div>
+        <button type="submit" onclick="sendRequest()">Отправить</button>
+    </div>
+
+
+
+    <img id="img" />
+
+    <script>
+        var els = document.getElementsByTagName('input')
+        Array.prototype.forEach.call(els, function (el) {
+            el.addEventListener('input', resizeInput);
+            resizeInput.call(el);
+        });
+        document.getElementById("left_border").addEventListener('input', copy("x0"));
+        document.getElementById("x0").addEventListener('input', copy("left_border"));
+        document.getElementById("right_border").addEventListener('input', rightBorder);
+        function resizeInput() {
+            this.style.width = (this.value.length + 2) + "ch";
+        }
+
+        function rightBorder() {
+            val = document.getElementById("left_border").value
+            if (this.value < val)
+                this.value = val
+        }
+
+        function copy(toId) {
+            return function () {
+                elem = document.getElementById(toId)
+                elem.value = this.value
+                elem.style.width = (elem.value.length + 2) + "ch";
+            }
+        }
+
+        async function sendRequest() {
+            kx = parseFloat(document.getElementById("kx").value)
+            ky = parseFloat(document.getElementById("ky").value)
+            c = parseFloat(document.getElementById("c").value)
+            x0 = parseFloat(document.getElementById("x0").value)
+            y0 = parseFloat(document.getElementById("y0").value)
+            h = parseFloat(document.getElementById("h").value)
+            right_border = parseFloat(document.getElementById("right_border").value)
+            req = {
+                "kx": kx,
+                "ky": ky,
+                "c": c,
+                "x0": x0,
+                "y0": y0,
+                "h": h,
+                "left_border": left_border,
+                "right_border": right_border
+            }
+            console.log(req)
+            res = await fetch("/solve", {
+                method: "post",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(req)
+            })
+            json = await res.json()
+            console.log(json)
+            document.getElementById('img').setAttribute('src', "data:image/png;base64," + json.picture);
+
+        }
+    </script>
+</body>
+
+</html>
