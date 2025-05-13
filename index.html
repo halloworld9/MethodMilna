@@ -50,6 +50,7 @@
 
 
     <img id="img" />
+    <div id="dots"></div>
 
     <script>
         var els = document.getElementsByTagName('input')
@@ -59,21 +60,16 @@
         });
         document.getElementById("left_border").addEventListener('input', copy("x0"));
         document.getElementById("x0").addEventListener('input', copy("left_border"));
-        document.getElementById("right_border").addEventListener('input', rightBorder);
         function resizeInput() {
             this.style.width = (this.value.length + 2) + "ch";
         }
 
-        function rightBorder() {
-            val = document.getElementById("left_border").value
-            if (this.value < val)
-                this.value = val
-        }
 
         function copy(toId) {
             return function () {
                 elem = document.getElementById(toId)
                 elem.value = this.value
+                document.getElementById("right_border").min = this.value
                 elem.style.width = (elem.value.length + 2) + "ch";
             }
         }
@@ -104,8 +100,14 @@
             })
             json = await res.json()
             console.log(json)
+            dots.innerHTML = ''
             document.getElementById('img').setAttribute('src', "data:image/png;base64," + json.picture);
-
+            dots = document.getElementById("dots")
+            json.xy.forEach((el) => {
+                d = document.createElement("div")
+                d.innerHTML = "x: " + el.X + " y: " + el.Y
+                dots.appendChild(d)
+            })
         }
     </script>
 </body>
